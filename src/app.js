@@ -45,7 +45,7 @@ const axios = require('axios');
 const { Client } = require("@gradio/client");
 const { extractPassage, getAllLyrics, getLyrics, THEME_SCORE_THRESHOLD } = require('./extraction');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-
+const nlpCache = require('./utils/nlpCache');
 const { spawn } = require('child_process');
 
 const app = express();
@@ -75,25 +75,26 @@ const client = new MongoClient(uri, {
     }
 });
 
-async function connectToMongo() {
-    try {
-        // Connect the client to the server
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("✅ Successfully connected to MongoDB Atlas!");
-    } catch (err) {
-        console.error("❌ MongoDB Connection Error:");
-        console.error(err.message);
-        // If it's an auth error, specifically warn about credentials
-        if (err.message.includes("Authentication failed")) {
-            console.warn("TIP: Check your .env file for extra spaces or quotes in MONGODB_PASSWORD.");
-        }
-    }
-}
+// async function connectToMongo() {
+//     try {
+//         // Connect the client to the server
+//         await client.connect();
+//         // Send a ping to confirm a successful connection
+//         await client.db("admin").command({ ping: 1 });
+//         console.log("✅ Successfully connected to MongoDB Atlas!");
+//     } catch (err) {
+//         console.error("❌ MongoDB Connection Error:");
+//         console.error(err.message);
+//         // If it's an auth error, specifically warn about credentials
+//         if (err.message.includes("Authentication failed")) {
+//             console.warn("TIP: Check your .env file for extra spaces or quotes in MONGODB_PASSWORD.");
+//         }
+//     }
+// }
 
 // TODO: connect database by uncommenting the below
 // connectToMongo();
+
 
 app.use(express.json());
 
@@ -191,12 +192,31 @@ app.get('/healthcheck', (_, res) => {
 });
 
 /**
+ * Get catalog of all songs in a collection
+ */
+app.get('/songs/v1', (req, res) => {
+    try {
+        const collectionKey = req.query.collection || 'marsfield_cc';
+        const songs = getAllLyrics(collectionKey);
+        res.json({
+            collection: collectionKey,
+            total_songs: songs.length,
+            songs: songs
+        });
+    } catch (error) {
+        res.status(404).json({ error: error.message });
+    }
+});
+
+/**
  * Get songs matching list of bible passages provided as input
  */
 app.post('/songs/matches/v1', async (req, res) => {
     console.log("Received request for /songs/matches...");
     try {
         // Extract raw query params
+        const collectionKey = req.query.collection || req.body.collection || 'marsfield_cc';
+
         console.log("Parsing query passages...");
         const requestedPassages = req.body.passages;
 
@@ -249,8 +269,16 @@ app.post('/songs/matches/v1', async (req, res) => {
             resolved: firstResolved
         };
 
+        console.log("Attempting to retrieve from cache...");
+        const cacheKey = nlpCache.generateKey(collectionKey, '/predict/passage', { passages: resolvedPassages });
+        const cachedResult = nlpCache.get(cacheKey);
+        if (cachedResult) {
+            console.log(`[Cache Hit] Returning cached matches for collection: ${ collectionKey }`);
+            return res.json(cachedResult);
+        }
+
         console.log("Extracting lyrics of all songs...");
-        const songs = getAllLyrics().map(s => ({
+        const songs = getAllLyrics(collectionKey).map(s => ({
             name: s.name,
             artist: s.artist,
             year: s.year,
@@ -290,14 +318,20 @@ app.post('/songs/matches/v1', async (req, res) => {
                     });
                 }
 
-                console.log("Returning response packet as json...\n");
-                res.json({
+                const responseData = {
+                    collection: collectionKey,
                     passages: resolvedPassages,
                     total_matches: results.length,
                     matches: results
-                });
+                };
 
-                break; // Connection succeeded! Drop out of loop.
+                // Save to Cache before returning
+                nlpCache.set(cacheKey, responseData);
+
+                console.log("Returning response packet as json...\n");
+                return res.json(responseData);
+
+                // Connection succeeded! Drop out of loop.
             } catch (connectError) {
                 retries--;
                 console.warn(`[Connection Attempt] Space is waking up or unavailable. Retries left: ${ retries }. Message: ${ connectError.message }`);
@@ -338,13 +372,22 @@ app.post('/text/matches/v1', async (req, res) => {
     console.log("Received request for /text/matches...");
     try {
         console.log("Parsing text in request body...");
+        const collectionKey = req.query.collection || req.body.collection || 'marsfield_cc';
         const text = req.body.text;
         if (!text) {
             return res.status(400).json({ error: "A 'text' field is required in the request body." });
         }
 
+        console.log("Attempting to retrieve from cache...");
+        const cacheKey = nlpCache.generateKey(collectionKey, '/predict/text', { text });
+        const cachedResult = nlpCache.get(cacheKey);
+        if (cachedResult) {
+            console.log(`[Cache Hit] Returning cached matches for text query in collection: ${ collectionKey }`);
+            return res.json(cachedResult);
+        }
+
         console.log("Extracting lyrics of all songs...");
-        const songs = getAllLyrics().map(s => ({
+        const songs = getAllLyrics(collectionKey).map(s => ({
             name: s.name,
             artist: s.artist,
             year: s.year,
@@ -384,13 +427,18 @@ app.post('/text/matches/v1', async (req, res) => {
                     });
                 }
 
-                console.log("Returning response packet as json...\n");
-                res.json({
+                const responseData = {
+                    collection: collectionKey,
                     search_query: text,
                     total_matches: results.length,
                     matches: results
-                });
-                break; // Connection succeeded! Drop out of loop.
+                };
+
+                // Save to Cache before returning
+                nlpCache.set(cacheKey, responseData);
+
+                console.log("Returning response packet as json...\n");
+                return res.json(responseData);  // Connection succeeded! Drop out of loop.
             } catch (connectError) {
                 retries--;
                 console.warn(`[Connection Attempt] Space is waking up or unavailable. Retries left: ${ retries }. Message: ${ connectError.message }`);
@@ -429,13 +477,27 @@ app.post('/text/matches/v1', async (req, res) => {
 app.get('/songs/themes/v1', async (req, res) => {
     console.log("Received request for /songs/themes...");
     try {
-        console.log("Extracting lyrics of all songs...");
-        const songs = getAllLyrics().map(s => ({
+        const collectionKey = req.query.collection || 'marsfield_cc';
+
+        console.log(`Extracting lyrics for collection "${ collectionKey }"...`);
+        const songs = getAllLyrics(collectionKey).map(s => ({
             name: s.name,
             artist: s.artist,
             year: s.year,
             lyrics: s.lyrics
         }));
+
+        // 1. Generate unique cache key using valid songs count
+        const cacheKey = nlpCache.generateKey(collectionKey, '/extract_themes', { songsCount: songs.length });
+
+        // 2. Check cache first
+        const cachedResult = nlpCache.get(cacheKey);
+        if (cachedResult) {
+            console.log(`[Cache Hit] Returning cached NLP themes for collection: ${ collectionKey }`);
+            return res.json(cachedResult);
+        }
+
+        console.log(`[Cache Miss] Calling HF NLP worker...`);
 
         // Call to SelahSearch NLP Agent in Hugging Face Space
         const HF_TOKEN = process.env.HF_TOKEN;
@@ -486,10 +548,10 @@ app.get('/songs/themes/v1', async (req, res) => {
                         theme_scores: filteredThemes
                     });
                 }
-                console.log("\nReturning response packet as json...\n");
-                res.json(matches);
 
-                break; // Connection succeeded! Drop out of loop.
+                nlpCache.set(cacheKey, matches);
+                console.log("\nReturning response packet as json...\n");
+                return res.json(matches); // Connection succeeded! Drop out of loop.
             } catch (connectError) {
                 retries--;
                 console.warn(`[Connection Attempt] Space is waking up or unavailable. Retries left: ${ retries }. Message: ${ connectError.message }`);
@@ -792,10 +854,15 @@ app.post('/passages/contents/v1', async (req, res) => {
             });
         }
 
-        const passage = {
-            text: combinedText.trim(),
-            resolved: firstResolved
-        };
+        // const returnPassages = {
+        //     text: combinedText.trim(),
+        //     resolved: resolvedPassages
+        // };
+
+        // console.log("Returning response packet as json...\n");
+        // res.json({
+        //     passages: returnPassages,
+        // });
 
         console.log("Returning response packet as json...\n");
         res.json({
@@ -945,4 +1012,6 @@ app.post('/song/lyrics/v1', async (req, res) => {
 // });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`\nSelahSearch API listening on port ${ PORT }...\n`));
+app.listen(PORT, () => {
+    console.log(`\nSelahSearch API listening on port ${ PORT }...\n`);
+});

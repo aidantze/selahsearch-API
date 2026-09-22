@@ -354,3 +354,13 @@ vite.config.ts.timestamp-*
 
 # package-lock.json
 package-lock.json
+
+.DS_Store
+images/
+tmp/
+.cache/
+models/
+transformers_cache/
+*.sqlite
+*.db
+*.log
