@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0",
+  "collections": [
+    {
+      "id": 1,
+      "key": "marsfield_cc",
+      "name": "Marsfield Community Church",
+      "description": "Active worship song library",
+      "isActive": true,
+      "createdAt": "2026-09-02T00:43:54.786Z"
+    },
+    {
+      "id": 2,
+      "key": "marsfield_cc_new",
+      "name": "Marsfield Community Church (New Additions)",
+      "description": "Staging queue for upcoming worship songs",
+      "isActive": true,
+      "createdAt": "2026-09-02T00:43:54.787Z"
+    }
+  ]
+}
