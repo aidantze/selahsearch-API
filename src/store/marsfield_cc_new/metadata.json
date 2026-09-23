@@ -1,6 +1,6 @@
 {
   "collectionKey": "marsfield_cc_new",
-  "totalSongs": 24,
+  "totalSongs": 35,
   "songs": [
     {
       "id": "1",
@@ -193,6 +193,94 @@
       "artist": "For All Seasons",
       "year": "2019",
       "filename": "light_and_momentary.txt"
+    },
+    {
+      "id": "25",
+      "slug": "beneath_the_waters_i_will_rise",
+      "name": "Beneath The Waters (i Will Rise)",
+      "artist": "Hillsong Worship",
+      "year": "2012",
+      "filename": "beneath_the_waters_i_will_rise.txt"
+    },
+    {
+      "id": "26",
+      "slug": "o_come_to_the_altar",
+      "name": "O Come To The Altar",
+      "artist": "Elevation Worship",
+      "year": "2016",
+      "filename": "o_come_to_the_altar.txt"
+    },
+    {
+      "id": "27",
+      "slug": "from_everlasting_psalm_90",
+      "name": "From Everlasting (psalm 90)",
+      "artist": "Sovereign Grace",
+      "year": "2022",
+      "filename": "from_everlasting_psalm_90.txt"
+    },
+    {
+      "id": "28",
+      "slug": "he_will_be",
+      "name": "He Will Be",
+      "artist": "Cityalight",
+      "year": "2025",
+      "filename": "he_will_be.txt"
+    },
+    {
+      "id": "29",
+      "slug": "he_is_worthy",
+      "name": "He Is Worthy",
+      "artist": "Sovereign Grace",
+      "year": "2018",
+      "filename": "he_is_worthy.txt"
+    },
+    {
+      "id": "30",
+      "slug": "cornerstone",
+      "name": "Cornerstone",
+      "artist": "Hillsong Worship",
+      "year": "2012",
+      "filename": "cornerstone.txt"
+    },
+    {
+      "id": "31",
+      "slug": "good_and_gracious_king",
+      "name": "Good And Gracious King",
+      "artist": "Cityalight",
+      "year": "2016",
+      "filename": "good_and_gracious_king.txt"
+    },
+    {
+      "id": "32",
+      "slug": "lord_i_need_you",
+      "name": "Lord I Need You",
+      "artist": "Matt Maher",
+      "year": "2013",
+      "filename": "lord_i_need_you.txt"
+    },
+    {
+      "id": "33",
+      "slug": "the_chorus_of_the_saved",
+      "name": "The Chorus Of The Saved",
+      "artist": "Emu Music",
+      "year": "2014",
+      "filename": "the_chorus_of_the_saved.txt"
+    },
+    {
+      "id": "34",
+      "slug": "we_declare",
+      "name": "We Declare",
+      "artist": "Emu Music",
+      "year": "2016",
+      "filename": "we_declare.txt"
+    },
+    {
+      "id": "35",
+      "slug": "hymn_of_the_saviour",
+      "name": "Hymn Of The Saviour",
+      "artist": "Emu Music",
+      "year": "2019",
+      "filename": "hymn_of_the_saviour.txt"
     }
   ]
 }
