@@ -1,6 +1,6 @@
 {
   "collectionKey": "marsfield_cc_new",
-  "totalSongs": 35,
+  "totalSongs": 36,
   "songs": [
     {
       "id": "1",
@@ -281,6 +281,14 @@
       "artist": "Emu Music",
       "year": "2019",
       "filename": "hymn_of_the_saviour.txt"
+    },
+    {
+      "id": "36",
+      "slug": "take_heart",
+      "name": "Take Heart",
+      "artist": "Emu Music",
+      "year": "2019",
+      "filename": "take_heart.txt"
     }
   ]
 }
