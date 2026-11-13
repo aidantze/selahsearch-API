@@ -909,7 +909,8 @@ app.post('/song/lyrics/v1', async (req, res) => {
 
         console.log(`Extracting lyrics of songs matching given parameters...`);
         const metadataArgs = { name, artist, year };
-        const response = getLyrics(metadataArgs);
+        const collectionKey = req.body.collection || req.query.collection || 'marsfield_cc';
+        const response = getLyrics(metadataArgs, collectionKey);
 
         console.log("Returning response packet as json...\n");
         res.json(!response ? { response: null } : response);

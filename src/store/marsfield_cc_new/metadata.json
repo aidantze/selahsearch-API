@@ -1,6 +1,6 @@
 {
   "collectionKey": "marsfield_cc_new",
-  "totalSongs": 36,
+  "totalSongs": 41,
   "songs": [
     {
       "id": "1",
@@ -289,6 +289,46 @@
       "artist": "Emu Music",
       "year": "2019",
       "filename": "take_heart.txt"
+    },
+    {
+      "id": "37",
+      "slug": "just_as_he_said",
+      "name": "Just As He Said",
+      "artist": "Emu Music",
+      "year": "2026",
+      "filename": "just_as_he_said.txt"
+    },
+    {
+      "id": "38",
+      "slug": "not_my_will_but_yours",
+      "name": "Not My Will But Yours",
+      "artist": "Emu Music",
+      "year": "2026",
+      "filename": "not_my_will_but_yours.txt"
+    },
+    {
+      "id": "39",
+      "slug": "jesus_christ_over_everything",
+      "name": "Jesus Christ Over Everything",
+      "artist": "Canyon Hills Worship",
+      "year": "2024",
+      "filename": "jesus_christ_over_everything.txt"
+    },
+    {
+      "id": "40",
+      "slug": "christ_is_risen_he_is_risen_indeed",
+      "name": "Christ Is Risen He Is Risen Indeed",
+      "artist": "Keith & Kristyn Getty",
+      "year": "2012",
+      "filename": "christ_is_risen_he_is_risen_indeed.txt"
+    },
+    {
+      "id": "41",
+      "slug": "praise_the_king",
+      "name": "Praise The King",
+      "artist": "Corey Voss",
+      "year": "2015",
+      "filename": "praise_the_king.txt"
     }
   ]
 }
